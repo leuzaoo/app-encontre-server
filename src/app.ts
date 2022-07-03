@@ -1,4 +1,4 @@
-import "module-alias/register";
+import "./config/module-alias";
 import "dotenv/config";
 import { config } from "@/config";
 import { SetupServer } from "@/server";
