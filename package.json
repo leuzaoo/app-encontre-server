@@ -4,7 +4,8 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
-    "start": "ts-node-dev --respawn --transpile-only --ignore-watch node_modules ./src/app.ts",
+    "start": "node dist/src/app.js",
+    "dev": "ts-node-dev --respawn --transpile-only --ignore-watch node_modules ./src/app.ts",
     "build": "tsc",
     "build:serve": "npm run build && node dist/src/app.js",
     "lint": "eslint ./src --ext .ts",
