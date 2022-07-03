@@ -5,15 +5,12 @@ import { config } from "@/config";
 
 export function connectDatabase(): Promise<DataSource> {
   const database = new DataSource({
+    url: config.database.url,
     type: "postgres",
-    host: config.database.host,
-    port: config.database.port,
-    username: config.database.username,
-    password: config.database.password,
-    database: config.database.name,
     synchronize: true,
     entities: [User],
   });
+  console.log(config.database.url);
 
   return database.initialize();
 }
