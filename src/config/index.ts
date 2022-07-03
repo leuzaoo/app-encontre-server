@@ -2,7 +2,7 @@ export const config = {
   port: Number(process.env.PORT),
   database: {
     url: process.env.DATABASE_URL,
-    ignoreSSL: process.env.IGNORE_SSL === "true",
+    useSSL: process.env.USE_SSL === "true",
   },
   auth: {
     secret: process.env.JWT_SECRET || "",

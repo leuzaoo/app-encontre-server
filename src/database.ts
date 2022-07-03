@@ -9,9 +9,11 @@ export function connectDatabase(): Promise<DataSource> {
     type: "postgres",
     synchronize: true,
     entities: [User],
-    ssl: {
-      rejectUnauthorized: config.database.ignoreSSL,
-    },
+    ...(config.database.useSSL && {
+      ssl: {
+        rejectUnauthorized: false,
+      },
+    }),
   });
   console.log(config.database.url);
 
