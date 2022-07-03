@@ -1,8 +1,9 @@
-import { Response } from "express";
-import { Controller, Post } from "@overnightjs/core";
-import { RequestBody } from "@/declarations/Request";
-import { User } from "@/entities/user";
+import { Request, Response } from "express";
+import { Controller, Get, Post, Middleware } from "@overnightjs/core";
 import { hashPassword, comparePasswords, generateToken } from "@/utils/auth";
+import { RequestBody } from "@/declarations/Request";
+import { authMiddleware } from "@/middlewares/auth";
+import { User } from "@/entities/user";
 
 interface CreateBody {
   name: string;
@@ -18,6 +19,21 @@ interface AuthenticateBody {
 
 @Controller("v1/users")
 export class UsersController {
+  @Get("profile")
+  @Middleware(authMiddleware)
+  async profile(request: Request, response: Response): Promise<Response> {
+    const user = await User.findOneBy({ id: request.context.userId });
+    if (!user) {
+      return response.status(401).send({ error: "User not found" });
+    }
+    return response.send({
+      id: user.id,
+      name: user.name,
+      lastName: user.lastName,
+      email: user.email,
+    });
+  }
+
   @Post("")
   async create(
     request: RequestBody<CreateBody>,
