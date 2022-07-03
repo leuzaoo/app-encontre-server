@@ -15,7 +15,6 @@ export function connectDatabase(): Promise<DataSource> {
       },
     }),
   });
-  console.log(config.database.url);
 
   return database.initialize();
 }
