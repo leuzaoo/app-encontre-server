@@ -1,3 +1,4 @@
+import cors from "cors";
 import bodyParser from "body-parser";
 import { Server } from "@overnightjs/core";
 import { connectDatabase } from "@/database";
@@ -17,6 +18,7 @@ export class SetupServer extends Server {
 
   public setupServer(): void {
     this.app.use(bodyParser.json());
+    this.app.use(cors());
   }
 
   public setupControllers(): void {
