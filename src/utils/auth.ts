@@ -3,7 +3,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import { config } from "@/config";
 
 export function hashPassword(password: string) {
-  const salt = 10;
+  const salt = config.auth.salt;
   return bcrypt.hash(password, salt);
 }
 
