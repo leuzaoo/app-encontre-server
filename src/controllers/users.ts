@@ -1,9 +1,11 @@
 import { Request, Response } from "express";
 import { Controller, Get, Post, Middleware } from "@overnightjs/core";
 import { hashPassword, comparePasswords, generateToken } from "@/utils/auth";
+import { sendEmail } from "@/utils/email";
 import { RequestBody } from "@/declarations/Request";
 import { authMiddleware } from "@/middlewares/auth";
 import { User } from "@/entities/user";
+import { config } from "@/config";
 
 interface CreateBody {
   name: string;
@@ -22,7 +24,7 @@ export class UsersController {
   @Get("profile")
   @Middleware(authMiddleware)
   async profile(request: Request, response: Response): Promise<Response> {
-    const user = await User.findOneBy({ id: request.context.userId });
+    const user = await User.findOneBy({ id: request.context.userId || "" });
     if (!user) {
       return response.status(401).send({ error: "User not found" });
     }
@@ -39,7 +41,9 @@ export class UsersController {
     request: RequestBody<CreateBody>,
     response: Response
   ): Promise<Response> {
-    const existingUser = await User.findOneBy({ email: request.body.email });
+    const existingUser = await User.findOneBy({
+      email: request.body.email || "",
+    });
     if (existingUser) {
       return response.status(401).send({ error: "Email already used" });
     }
@@ -56,7 +60,7 @@ export class UsersController {
     request: RequestBody<AuthenticateBody>,
     response: Response
   ): Promise<Response> {
-    const user = await User.findOneBy({ email: request.body.email });
+    const user = await User.findOneBy({ email: request.body.email || "" });
     if (!user) return response.status(401).send({ error: "Invalid user" });
 
     const isValidPwd = await comparePasswords(
@@ -68,5 +72,29 @@ export class UsersController {
     }
 
     return response.send({ token: generateToken(user.id) });
+  }
+
+  @Post("recover-password")
+  async recoverPassword(
+    request: RequestBody<{ email: string }>,
+    response: Response
+  ): Promise<Response> {
+    try {
+      const user = await User.findOneBy({
+        email: request.body.email || "",
+      });
+      if (!user) return response.status(400).send({ error: "Email not found" });
+
+      const token = generateToken(user.id);
+      const url = `${config.client}/reset-password?token=${token}`;
+      await sendEmail({
+        to: request.body.email,
+        content: `<a href="${url}">${url}</a>`,
+        subject: "App Encontre: Reset de senha",
+      });
+      return response.send(true);
+    } catch (error) {
+      return response.status(400).send(false);
+    }
   }
 }
