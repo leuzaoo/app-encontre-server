@@ -1,11 +1,16 @@
 import { Request, Response } from "express";
-import { Controller, Get, Post, Middleware } from "@overnightjs/core";
-import { hashPassword, comparePasswords, generateToken } from "@/utils/auth";
+import { Controller, Get, Post, Put, Middleware } from "@overnightjs/core";
 import { sendEmail } from "@/utils/email";
 import { RequestBody } from "@/declarations/Request";
 import { authMiddleware } from "@/middlewares/auth";
 import { User } from "@/entities/user";
 import { config } from "@/config";
+import {
+  hashPassword,
+  comparePasswords,
+  generateToken,
+  decodeToken,
+} from "@/utils/auth";
 
 interface CreateBody {
   name: string;
@@ -17,6 +22,12 @@ interface CreateBody {
 interface AuthenticateBody {
   email: string;
   password: string;
+}
+
+interface ResetPasswordBody {
+  token: string;
+  password: string;
+  confirm: string;
 }
 
 @Controller("v1/users")
@@ -94,7 +105,35 @@ export class UsersController {
       });
       return response.send(true);
     } catch (error) {
-      return response.status(400).send(false);
+      return response.status(400).send({ error: "Error reseting password" });
+    }
+  }
+
+  @Put("reset-password")
+  async resetPassword(
+    request: RequestBody<ResetPasswordBody>,
+    response: Response
+  ): Promise<Response> {
+    try {
+      const claims = decodeToken(request.body.token);
+      const userId = claims.sub as string;
+      const user = await User.findOneBy({ id: userId || "" });
+
+      if (!user) {
+        return response.status(400).send({ error: "User not found" });
+      }
+
+      if (request.body.password !== request.body.confirm) {
+        return response.status(400).send({ error: "Passwords does not match" });
+      }
+
+      const password = await hashPassword(request.body.password);
+      user.password = password;
+      user.save();
+
+      return response.send(true);
+    } catch (error) {
+      return response.status(400).send({ error: "Error reseting password" });
     }
   }
 }
