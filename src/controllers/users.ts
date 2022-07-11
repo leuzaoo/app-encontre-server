@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
 import { Controller, Get, Post, Put, Middleware } from "@overnightjs/core";
-import { sendEmail } from "@/utils/email";
 import { RequestBody } from "@/declarations/Request";
+import { sendEmail } from "@/utils/email";
 import { authMiddleware } from "@/middlewares/auth";
+import { UserValidations } from "@/validations/user";
 import { User } from "@/entities/user";
 import { config } from "@/config";
 import {
@@ -36,18 +37,18 @@ export class UsersController {
   @Middleware(authMiddleware)
   async profile(request: Request, response: Response): Promise<Response> {
     const user = await User.findOneBy({ id: request.context.userId || "" });
-    if (!user) {
-      return response.status(401).send({ error: "User not found" });
-    }
-    return response.send({
-      id: user.id,
-      name: user.name,
-      lastName: user.lastName,
-      email: user.email,
-    });
+    return user
+      ? response.send({
+          id: user.id,
+          name: user.name,
+          lastName: user.lastName,
+          email: user.email,
+        })
+      : response.status(401).send({ error: "User not found" });
   }
 
   @Post("")
+  @Middleware(UserValidations.create)
   async create(
     request: RequestBody<CreateBody>,
     response: Response
@@ -67,6 +68,7 @@ export class UsersController {
   }
 
   @Post("authenticate")
+  @Middleware(UserValidations.authenticate)
   async authenticate(
     request: RequestBody<AuthenticateBody>,
     response: Response
@@ -86,6 +88,7 @@ export class UsersController {
   }
 
   @Post("recover-password")
+  @Middleware(UserValidations.recoverPassword)
   async recoverPassword(
     request: RequestBody<{ email: string }>,
     response: Response
@@ -110,6 +113,7 @@ export class UsersController {
   }
 
   @Put("reset-password")
+  @Middleware(UserValidations.resetPassword)
   async resetPassword(
     request: RequestBody<ResetPasswordBody>,
     response: Response
