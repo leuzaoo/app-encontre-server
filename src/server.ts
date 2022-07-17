@@ -2,8 +2,9 @@ import cors from "cors";
 import bodyParser from "body-parser";
 import { Server } from "@overnightjs/core";
 import { connectDatabase } from "@/database";
-import { LocationsController } from "@/controllers/locations";
+import { AdminController } from "@/controllers/admin";
 import { UsersController } from "@/controllers/users";
+import { LocationsController } from "@/controllers/locations";
 
 export class SetupServer extends Server {
   constructor(private port = 3000) {
@@ -22,7 +23,11 @@ export class SetupServer extends Server {
   }
 
   public setupControllers(): void {
-    this.addControllers([new UsersController(), new LocationsController()]);
+    this.addControllers([
+      new AdminController(),
+      new UsersController(),
+      new LocationsController(),
+    ]);
   }
 
   public async setupDatabase(): Promise<void> {

@@ -1,6 +1,7 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
 import { User } from "@/entities/user";
+import { Admin } from "@/entities/admin";
 import { config } from "@/config";
 
 export function connectDatabase(): Promise<DataSource> {
@@ -8,7 +9,7 @@ export function connectDatabase(): Promise<DataSource> {
     url: config.database.url,
     type: "postgres",
     synchronize: true,
-    entities: [User],
+    entities: [User, Admin],
     ...(config.database.useSSL && {
       ssl: {
         rejectUnauthorized: false,

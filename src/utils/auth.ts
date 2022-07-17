@@ -11,8 +11,8 @@ export function comparePasswords(password: string, hashedPassword: string) {
   return bcrypt.compare(password, hashedPassword);
 }
 
-export function generateToken(sub: string): string {
-  return jwt.sign({ sub }, config.auth.secret);
+export function generateToken(sub: string, secret?: string): string {
+  return jwt.sign({ sub }, secret || config.auth.secret);
 }
 
 export function decodeToken(token: string): string | JwtPayload {

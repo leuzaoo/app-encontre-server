@@ -7,6 +7,7 @@ export const config = {
   },
   auth: {
     secret: process.env.JWT_SECRET || "",
+    adminSecret: process.env.JWT_ADMIN_SECRET || "",
     salt: Number(process.env.PWD_SALT),
   },
   email: {
